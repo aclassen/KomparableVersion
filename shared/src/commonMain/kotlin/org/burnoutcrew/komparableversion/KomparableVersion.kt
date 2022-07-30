@@ -55,8 +55,10 @@ package org.burnoutcrew.komparableversion
 
 class KomparableVersion(version: String) : Comparable<KomparableVersion> {
     private var value: String = ""
-    private var canonical: String? = null
     private var items = Item.ListItem()
+    private var _canonical: String? = null
+    val canonical: String
+        get() = _canonical ?: items.toString().apply { _canonical = this }
 
     init {
         parseVersion(version)
@@ -117,7 +119,7 @@ class KomparableVersion(version: String) : Comparable<KomparableVersion> {
             list = stack.removeFirst() as Item.ListItem
             list.normalize()
         }
-        canonical = null
+        _canonical = null
     }
 
     private sealed class Item : Comparable<Item?> {
@@ -228,17 +230,19 @@ class KomparableVersion(version: String) : Comparable<KomparableVersion> {
             }
 
             private val value: String =
-                (if (followedByDigit && value.length == 1) {
-                    // a1 = alpha-1, b1 = beta-1, m1 = milestone-1
-                    when (value[0]) {
-                        'a' -> "alpha"
-                        'b' -> "beta"
-                        'm' -> "milestone"
-                        else -> value
-                    }
-                } else {
-                    value
-                })
+                (
+                        if (followedByDigit && value.length == 1) {
+                            // a1 = alpha-1, b1 = beta-1, m1 = milestone-1
+                            when (value[0]) {
+                                'a' -> "alpha"
+                                'b' -> "beta"
+                                'm' -> "milestone"
+                                else -> value
+                            }
+                        } else {
+                            value
+                        }
+                        )
                     .let { ALIASES[it] ?: it }
 
             override val isNull: Boolean
@@ -396,13 +400,6 @@ class KomparableVersion(version: String) : Comparable<KomparableVersion> {
         items.compareTo(other.items)
 
     override fun toString(): String = value
-
-    fun getCanonical(): String? {
-        if (canonical == null) {
-            canonical = items.toString()
-        }
-        return canonical
-    }
 
     override fun equals(other: Any?): Boolean =
         other is KomparableVersion && items == other.items

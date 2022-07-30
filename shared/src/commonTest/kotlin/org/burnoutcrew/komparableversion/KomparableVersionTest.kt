@@ -36,10 +36,11 @@ class KomparableVersionTest {
 
     private fun newComparable(version: String): KomparableVersion {
         val ret = KomparableVersion(version)
-        val canonical = ret.getCanonical()
-        val parsedCanonical = KomparableVersion(canonical!!).getCanonical()
+        val canonical = ret.canonical
+        val parsedCanonical = KomparableVersion(canonical).canonical
         assertEquals(
-            canonical, parsedCanonical,
+            canonical,
+            parsedCanonical,
             "canonical( $version ) = $canonical -> canonical: $parsedCanonical"
         )
         return ret
