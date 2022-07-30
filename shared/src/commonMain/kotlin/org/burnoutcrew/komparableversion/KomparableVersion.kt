@@ -168,11 +168,11 @@ class KomparableVersion(version: String) : Comparable<KomparableVersion> {
             override val isNull: Boolean =
                 value == 0L
 
-            override operator fun compareTo(item: Item?): Int {
-                return item?.let {
+            override operator fun compareTo(other: Item?): Int {
+                return other?.let {
                     when (it) {
                         is IntItem -> 1
-                        is LongItem -> value.compareTo((it as LongItem).value)
+                        is LongItem -> value.compareTo(it.value)
                         is StringItem -> 1 // 1.1 > 1-sp
                         is ListItem -> 1 // 1.1 > 1-1
                     }
@@ -244,11 +244,11 @@ class KomparableVersion(version: String) : Comparable<KomparableVersion> {
             override val isNull: Boolean
                 get() = comparableQualifier(value).compareTo(RELEASE_VERSION_INDEX) == 0
 
-            override operator fun compareTo(item: Item?): Int {
-                return item?.let {
+            override operator fun compareTo(other: Item?): Int {
+                return other?.let {
                     when (it) {
                         is IntItem, is LongItem -> -1
-                        is StringItem -> comparableQualifier(value).compareTo(comparableQualifier((item as StringItem).value)) // 1.1 > 1-sp
+                        is StringItem -> comparableQualifier(value).compareTo(comparableQualifier(it.value)) // 1.1 > 1-sp
                         is ListItem -> -1 // 1.1 > 1-1
                     }
                 }
@@ -293,8 +293,8 @@ class KomparableVersion(version: String) : Comparable<KomparableVersion> {
                 }
             }
 
-            override operator fun compareTo(item: Item?): Int {
-                if (item == null) {
+            override operator fun compareTo(other: Item?): Int {
+                if (other == null) {
                     if (list.isEmpty()) {
                         return 0 // 1-0 = 1- (normalize) = 1
                     }
@@ -308,12 +308,12 @@ class KomparableVersion(version: String) : Comparable<KomparableVersion> {
                     return 0
                 }
 
-                return when (item) {
+                return when (other) {
                     is IntItem, is LongItem -> -1 // 1-1 < 1.0.x
                     is StringItem -> 1 // 1-1 > 1-sp
                     is ListItem -> {
                         val left: Iterator<Item> = list.iterator()
-                        val right: Iterator<Item> = (item as ListItem).list.iterator()
+                        val right: Iterator<Item> = other.list.iterator()
                         while (left.hasNext() || right.hasNext()) {
                             val l: Item? = if (left.hasNext()) left.next() else null
                             val r: Item? = if (right.hasNext()) right.next() else null
